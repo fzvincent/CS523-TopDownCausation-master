@@ -1,0 +1,11 @@
+{
+  "N_generations" :100,
+  "N_populations" :4,
+  "carryingCapacity" : 100,
+  "N":10,
+  "numberOfBins" : 10,
+  "k_value" :[2, 2, 3.9, 3.9],
+  "start_value" :[1.0, 1.1, 1.0, 1.1]
+}
+
+
