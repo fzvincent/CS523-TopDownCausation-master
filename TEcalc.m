@@ -30,7 +30,7 @@ function storeTE(eps, mpop, D)
     for i = 1:3
         maxTD = 0;
         maxBU = 0;
-        for k = 3:4
+        for k = 1:2
             TDtransferent = calcTE(D(:,1),D(:,i+1), k);
             BUtransferent = calcTE(D(:,i+1),D(:,1), k);
             if TDtransferent > maxTD

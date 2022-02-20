@@ -7,7 +7,7 @@
 
 #covid data from 
 #https://data.cdc.gov/Case-Surveillance/United-States-COVID-19-Cases-and-Deaths-by-State-o/9mfq-cb36
-
+setwd("d:/Yu/Projects/logical/CS523-TopDownCausation-master")
 
 #libraries ####
 library(tidyverse)
@@ -17,7 +17,7 @@ library(VennDiagram)
 
 
 #data ####
-datNYT <-  read.csv("Data/Raw/NYTiems us-counties-2022.csv")
+datNYT <-  read.csv("NYTiems us-counties-2022.csv")
 datNM_TX <- datNYT %>% 
   mutate(id = row_number()) %>% 
   mutate(date = as.Date(date)) %>% 
@@ -27,6 +27,8 @@ datNM_TX <- datNYT %>%
   pivot_wider(id_cols = date, names_from = state, values_from = log_cases_100K) %>% 
   drop_na() %>% 
   rename(Date1 = date)
+
+class(datNM_TX)
 
 #MI and TE series 1 - out-of-state quarantine in place ####
 datNM_TX1 <- datNM_TX %>% 
@@ -38,15 +40,16 @@ quants1 <- datNM_TX1 %>%
   select(!Date1) %>% 
   sapply(quantile, probs = c(0.25, 0.75))
 
-NM1_bwidth <- (2*(quants1[2,2] - quants1[1,2]))/10^(1/3)
+NM1_bwidth <- (2*(quants1[2,2] - quants1[1,2]))/nrow(datNM_TX1)^(1/3)
 NM1_bins <- ceiling((max(datNM_TX1$NewMexico)-min(datNM_TX1$NewMexico))/NM1_bwidth)
 
-TX1_bwidth <- (2*(quants1[2,1] - quants1[1,1]))/10^(1/3)
+TX1_bwidth <- (2*(quants1[2,1] - quants1[1,1]))/nrow(datNM_TX1)^(1/3)
 TX1_bins <- ceiling((max(datNM_TX1$Texas)-min(datNM_TX1$Texas))/TX1_bwidth)
 
   #mutual information calc
 NM_TX1_2d <- discretize2d(datNM_TX1$NewMexico, datNM_TX1$Texas, 
                          numBins1 = NM1_bins, numBins2 = TX1_bins)
+
     #joint entropy
 Joint_1 <- entropy(NM_TX1_2d)
     #marginal entropy
@@ -72,10 +75,10 @@ quants2 <- datNM_TX2 %>%
   select(!Date1) %>% 
   sapply(quantile, probs = c(0.25, 0.75))
 
-NM2_bwidth <- (2*(quants2[2,2] - quants2[1,2]))/10^(1/3)
+NM2_bwidth <- (2*(quants2[2,2] - quants2[1,2]))/nrow(datNM_TX2)^(1/3)
 NM2_bins <- ceiling((max(datNM_TX2$NewMexico)-min(datNM_TX2$NewMexico))/NM2_bwidth)
 
-TX2_bwidth <- (2*(quants2[2,1] - quants2[1,1]))/10^(1/3)
+TX2_bwidth <- (2*(quants2[2,1] - quants2[1,1]))/nrow(datNM_TX2)^(1/3)
 TX2_bins <- ceiling((max(datNM_TX2$Texas)-min(datNM_TX2$Texas))/TX2_bwidth)
 
 #mutual information calc
