@@ -2,7 +2,7 @@ import random
 import numpy as np
 from matplotlib import pyplot as plt
 import multiprocessing as mp
-
+import os
 # The model calculated at population i generation n+1
 def calc_x_inp1(eps, i, n, K, N):
     x[i, n] = (1-eps)*calc_f(x[i, n-1], K) + eps*calc_m_n(N, n-1, K)
@@ -82,9 +82,10 @@ def storedata(xtrans, M, N, gens, index, metapop):
     dataarray[:, 0] = M
     dataarray[:, 1:] = chosenpops
     # print(np.round(dataarray))
-    np.savetxt("TEdata_MX_" + str(index) + '_' + str(metapop) + ".csv",
+    # np.savetxt("TEdata_MX_" + str(index) + '_' + str(metapop) + ".csv",
+    #            np.round(dataarray), fmt='%d', delimiter=',')
+    np.savetxt(data_dir+"/"+data_dir+"_MX_" + str(index) + '_' + str(metapop) + ".csv",
                np.round(dataarray), fmt='%d', delimiter=',')
-
 
 # Sets parameters.  If part 2 (pic=True) runs the simulation for all epsilon
 # and plots the figure.  If part 3 runs the simulation and stores the 3
@@ -140,17 +141,22 @@ def mymain(index,x_0=1, pic=False):
 # If part 2 sets epsilon values to match Walker.  If part 3 sets epsilon values
 # to be between 0 and 1 at 0.025 increments
 if __name__ == "__main__":
+    data_dir='TEdata'
+    if os.path.isdir(data_dir)==False:
+        os.mkdir(data_dir)
+
     eps_vals_pic = [0, 0.075, 0.1, 0.2, 0.225, 0.25, 0.3, 0.4]
     #eps_vals = np.arange(0, 1.025, 0.025).tolist()
     eps_vals1=np.linspace(0.2,0.3,24,endpoint=0)#.tolist()
     eps_vals2=np.linspace(0.3,0.7,24)
+    global eps_vals
     eps_vals=np.concatenate((eps_vals1,eps_vals2)).tolist()
+
     x0 = 1
-    #main(x0, eps_vals, pic=0)
+
     #main(x0, eps_vals_pic, pic=1)
+    main(x0, eps_vals, pic=0)
 
-    pool = mp.Pool(mp.cpu_count())
-
-    #results = pool.map(mymain, [eps for eps in eps_vals])
-    pool.map(mymain, range(len(eps_vals)))
-    pool.close()
+    # pool = mp.Pool(mp.cpu_count())
+    # pool.map(mymain, range(len(eps_vals)))
+    # pool.close()

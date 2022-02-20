@@ -8,10 +8,10 @@ global TD_TE;
 global BU_TE;
 TD_TE = zeros(epsvals, 3*metapops);
 BU_TE = zeros(epsvals, 3*metapops);
-
-parfor eps = 1:epsvals
+%addpath('TEdata')  
+for eps = 1:epsvals
     for mpop = 1:metapops
-        filename = sprintf("TEdata_MX_%d_%d.csv", eps-1, mpop-1);
+        filename = sprintf("TEdata/TEdata_MX_%d_%d.csv", eps-1, mpop-1);
         if exist(filename, 'file')
             D = readmatrix(filename);
             storeTE(eps, mpop, D);
