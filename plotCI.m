@@ -4,8 +4,10 @@ TD = readmatrix('TD_data.csv');
 BU = readmatrix('BU_data.csv');
 
 % Values of epsilon: ranging from 0 to 1 at increments of 0.05
-epsvals = [0:0.025:1];
-
+%epsvals = [0:0.025:1];
+e1=linspace(0.2,0.3-(0.3-0.2)/20,24);
+e2=linspace(0.3,0.7,24);
+epsvals=cat(2,e1,e2);
 %Calculate mean and standard deviation of both TD and BU data
 muTD = mean(TD,2);
 muBU = mean(BU,2);
@@ -46,6 +48,15 @@ hold off
 %title('Top-Down and Bottom-Up Transfer Entropy');
 
 % Sets figure parameters
+<<<<<<< HEAD
 xlabel('global coupling coefficient (\epsilon)');
 ylabel('transfer entropy (TE)');
 legend('Average T_{M\rightarrow X}', 'Average T_{X\rightarrow M}', '95% CI for T_{M\rightarrow X}', '95% CI for T_{X\rightarrow M}');
+=======
+grid on
+xlabel('Tlobal coupling coefficient \epsilon');
+ylabel('Transfer entropy (bit)');
+legend('Average T_{M\rightarrow X}', 'Average T_{X\rightarrow M}', '95% CI for T_{M\rightarrow X}', '95% CI for T_{X\rightarrow M}');
+saveas(gcf,'f2_transfer_entropy.pdf')
+saveas(gcf,'f2_transfer_entropy.fig')
+>>>>>>> 7a24acd (razer1)
