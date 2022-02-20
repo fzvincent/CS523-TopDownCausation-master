@@ -32,7 +32,7 @@ plot(epsvals, muTD, 'r', 'linewidth', 1);
 plot(epsvals, muBU, 'b', 'linewidth', 1);
 fill(augx, augy_TD, 1,'facecolor', 'r', 'edgecolor', 'none', 'facealpha', 0.4);
 fill(augx, augy_BU, 1,'facecolor', 'c', 'edgecolor', 'none', 'facealpha', 0.4);
-xticks([0:0.1:1]);
+%xticks([0:0.1:1]);
 hold off
 
 %Used for plotting each point
@@ -48,15 +48,15 @@ hold off
 %title('Top-Down and Bottom-Up Transfer Entropy');
 
 % Sets figure parameters
-<<<<<<< HEAD
+
 xlabel('global coupling coefficient (\epsilon)');
 ylabel('transfer entropy (TE)');
 legend('Average T_{M\rightarrow X}', 'Average T_{X\rightarrow M}', '95% CI for T_{M\rightarrow X}', '95% CI for T_{X\rightarrow M}');
-=======
+
 grid on
 xlabel('Tlobal coupling coefficient \epsilon');
 ylabel('Transfer entropy (bit)');
 legend('Average T_{M\rightarrow X}', 'Average T_{X\rightarrow M}', '95% CI for T_{M\rightarrow X}', '95% CI for T_{X\rightarrow M}');
 saveas(gcf,'f2_transfer_entropy.pdf')
 saveas(gcf,'f2_transfer_entropy.fig')
->>>>>>> 7a24acd (razer1)
+
