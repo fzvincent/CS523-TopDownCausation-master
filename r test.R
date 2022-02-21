@@ -50,3 +50,8 @@ for ( i in 1:epsCount) {
     }
   }
 }
+
+Eps <- seq(1:48)
+par(mfrow = c(2,1))
+plot(Eps, TD_TE05)
+plot(Eps, BU_TE05)

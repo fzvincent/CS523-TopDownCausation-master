@@ -49,12 +49,11 @@ hold off
 
 % Sets figure parameters
 
-xlabel('global coupling coefficient (\epsilon)');
-ylabel('transfer entropy (TE)');
+
 legend('Average T_{M\rightarrow X}', 'Average T_{X\rightarrow M}', '95% CI for T_{M\rightarrow X}', '95% CI for T_{X\rightarrow M}');
 
 grid on
-xlabel('Tlobal coupling coefficient \epsilon');
+xlabel('Global coupling coefficient \epsilon');
 ylabel('Transfer entropy (bit)');
 legend('Average T_{M\rightarrow X}', 'Average T_{X\rightarrow M}', '95% CI for T_{M\rightarrow X}', '95% CI for T_{X\rightarrow M}');
 saveas(gcf,'f2_transfer_entropy.pdf')

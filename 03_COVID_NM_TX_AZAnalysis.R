@@ -21,7 +21,7 @@ datNYT <-  read.csv("NYTiems us-counties-2022.csv")
 datNM_TX <- datNYT %>% 
   mutate(id = row_number()) %>% 
   mutate(date = as.Date(date)) %>% 
-  filter(state == "New Mexico"| state == "Texas") %>% 
+  filter(state == "New Mexico"| state == "California") %>% 
   mutate(log_cases_100K = log(cases_avg_per_100k+1)) %>% 
   select(date, state, log_cases_100K) %>% 
   pivot_wider(id_cols = date, names_from = state, values_from = log_cases_100K) %>% 
@@ -44,10 +44,10 @@ NM1_bwidth <- (2*(quants1[2,2] - quants1[1,2]))/nrow(datNM_TX1)^(1/3)
 NM1_bins <- ceiling((max(datNM_TX1$NewMexico)-min(datNM_TX1$NewMexico))/NM1_bwidth)
 
 TX1_bwidth <- (2*(quants1[2,1] - quants1[1,1]))/nrow(datNM_TX1)^(1/3)
-TX1_bins <- ceiling((max(datNM_TX1$Texas)-min(datNM_TX1$Texas))/TX1_bwidth)
+TX1_bins <- ceiling((max(datNM_TX1$California)-min(datNM_TX1$California))/TX1_bwidth)
 
   #mutual information calc
-NM_TX1_2d <- discretize2d(datNM_TX1$NewMexico, datNM_TX1$Texas, 
+NM_TX1_2d <- discretize2d(datNM_TX1$NewMexico, datNM_TX1$California, 
                          numBins1 = NM1_bins, numBins2 = TX1_bins)
 
     #joint entropy
@@ -61,7 +61,7 @@ MI_NM_TX1 <- round((Marg_1r + Marg_1c - Joint_1), digits = 3)
 MI_NM_TX1
 
 #transfer entropy 
-TE_NM_TX1 <- transfer_entropy(datNM_TX1$NewMexico, datNM_TX1$Texas, 
+TE_NM_TX1 <- transfer_entropy(datNM_TX1$NewMexico, datNM_TX1$California, 
                               lx = 20, ly = 20)
 TE_NM_TX1
 
@@ -79,10 +79,10 @@ NM2_bwidth <- (2*(quants2[2,2] - quants2[1,2]))/nrow(datNM_TX2)^(1/3)
 NM2_bins <- ceiling((max(datNM_TX2$NewMexico)-min(datNM_TX2$NewMexico))/NM2_bwidth)
 
 TX2_bwidth <- (2*(quants2[2,1] - quants2[1,1]))/nrow(datNM_TX2)^(1/3)
-TX2_bins <- ceiling((max(datNM_TX2$Texas)-min(datNM_TX2$Texas))/TX2_bwidth)
+TX2_bins <- ceiling((max(datNM_TX2$California)-min(datNM_TX2$California))/TX2_bwidth)
 
 #mutual information calc
-NM_TX2_2d <- discretize2d(datNM_TX2$NewMexico, datNM_TX2$Texas, 
+NM_TX2_2d <- discretize2d(datNM_TX2$NewMexico, datNM_TX2$California, 
                           numBins1 = NM2_bins, numBins2 = TX2_bins)
   #joint entropy
 Joint_2 <- entropy(NM_TX2_2d)
@@ -96,7 +96,7 @@ MI_NM_TX2 <- round((Marg_2r + Marg_2c - Joint_2), digits = 3)
 MI_NM_TX2
 
   #transfer entropy 
-TE_NM_TX2 <- transfer_entropy(datNM_TX2$NewMexico, datNM_TX2$Texas)
+TE_NM_TX2 <- transfer_entropy(datNM_TX2$NewMexico, datNM_TX2$California)
 TE_NM_TX2
 
 #MI and TE series 2 - vaccinations available to all in New Mexico ####
@@ -114,10 +114,10 @@ NM3_bwidth <- (2*(quants3[2,2] - quants3[1,2]))/10^(1/3)
 NM3_bins <- ceiling((max(datNM_TX3$NewMexico)-min(datNM_TX3$NewMexico))/NM3_bwidth)
 
 TX3_bwidth <- (2*(quants3[2,1] - quants3[1,1]))/10^(1/3)
-TX3_bins <- ceiling((max(datNM_TX3$Texas)-min(datNM_TX3$Texas))/TX3_bwidth)
+TX3_bins <- ceiling((max(datNM_TX3$California)-min(datNM_TX3$California))/TX3_bwidth)
 
   #mutual information calc
-NM_TX3_2d <- discretize2d(datNM_TX3$NewMexico, datNM_TX3$Texas, 
+NM_TX3_2d <- discretize2d(datNM_TX3$NewMexico, datNM_TX3$California, 
                            numBins1 = NM3_bins, numBins2 = TX3_bins)
   #joint entropy
 Joint_3 <- entropy(NM_TX3_2d)
@@ -131,7 +131,7 @@ MI_NM_TX3 <- round((Marg_3r + Marg_3c - Joint_3), digits = 3)
 MI_NM_TX3
 
   #transfer entropy 
-TE_NM_TX3 <- transfer_entropy(datNM_TX3$NewMexico, datNM_TX3$Texas)
+TE_NM_TX3 <- transfer_entropy(datNM_TX3$NewMexico, datNM_TX3$California)
 TE_NM_TX3
 
 #plots ####
@@ -141,12 +141,12 @@ date_range <- which(datNM_TX$Date1 %in% as.Date(
   c("2021-02-01", "2021-03-01")))
 
 datNM_TX %>% 
-  pivot_longer(cols = Texas:"New Mexico", names_to = "State", values_to = "LogCases") %>% 
+  pivot_longer(cols = California:"New Mexico", names_to = "State", values_to = "LogCases") %>% 
   ggplot(aes(x = Date1, y = LogCases, col = State))+
   geom_line(size = 1)+
   geom_vline(xintercept = as.numeric(datNM_TX$Date1[date_range]),color = "black", 
              size = 1)+
-  scale_color_manual(values = c("New Mexico" = "red", Texas ="black"))+
+  scale_color_manual(values = c("New Mexico" = "red", California ="black"))+
   annotate(geom = "text", x = as.Date("2020-04-01"), y = 0.5, 
     label = "Out-of-state quarantine", hjust = 0, vjust = 1, size = 4)+
   annotate(geom = "text", x = as.Date("2020-05-01"), y = 5.5, size = 4,
@@ -186,7 +186,7 @@ p2_NM_TX3 <- ggpubr::annotate_figure(pl_NM_TX3, fig.lab = "Vaccinations fully av
                                      fig.lab.pos = c("top.left"), fig.lab.size = 12, 
                                      fig.lab.face = "bold")
 
-States <- c("New Mexico", 'Texas' )
+States <- c("New Mexico", 'California' )
 b <- c(1,2); c <- c(5,3)
 ab_dat <- as.data.frame(cbind(States,b,c))
 p1 <- ggplot(ab_dat, aes(x=b, y = c, color = States))+
