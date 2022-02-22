@@ -24,21 +24,26 @@ library(growthcurver)         #calculate r for logistic map
 #enable parallel processing
 plan(multisession)
 
+day0 <- as.Date("2020-03-15")
+day1 <- as.Date("2021-2-1")
+day2 <- as.Date("2022-2-1")
+
 #data ####
 datNYT <-  read.csv("NYTiems us-counties-2022.csv")
 datNM_TX <- datNYT %>% 
   mutate(id = row_number()) %>% 
   mutate(date = as.Date(date)) %>% 
-  filter(state == "New Mexico"| state == "Texas") %>% 
+  filter(state == "UnitedStates"| state == "California" ) %>% 
   select(date, state, cases_avg_per_100k) %>% 
   pivot_wider(id_cols = date, names_from = state, values_from = cases_avg_per_100k) %>% 
   drop_na() %>% 
   rename(Date1 = date)
 
+
 #MI and TE series 1 - out-of-state quarantine in place ####
 datNM_TX1 <- datNM_TX %>% 
-  filter(Date1 >="2020-03-11", Date1 < "2020-09-04") %>% 
-  rename(NewMexico = "New Mexico")
+  filter(Date1 >="2020-03-11", Date1 < day1) %>% 
+  rename(UnitedStates = "UnitedStates")
 
  #Descritize data to bins NM_TX 1
 quants1 <- datNM_TX1 %>% 
@@ -46,13 +51,13 @@ quants1 <- datNM_TX1 %>%
   sapply(quantile, probs = c(0.25, 0.75))
 
 NM1_bwidth <- (2*(quants1[2,2] - quants1[1,2]))/nrow(datNM_TX1)^(1/3)
-NM1_bins <- ceiling((max(datNM_TX1$NewMexico)-min(datNM_TX1$NewMexico))/NM1_bwidth)
+NM1_bins <- ceiling((max(datNM_TX1$UnitedStates)-min(datNM_TX1$UnitedStates))/NM1_bwidth)
 
 TX1_bwidth <- (2*(quants1[2,1] - quants1[1,1]))/nrow(datNM_TX1)^(1/3)
-TX1_bins <- ceiling((max(datNM_TX1$Texas)-min(datNM_TX1$Texas))/TX1_bwidth)
+TX1_bins <- ceiling((max(datNM_TX1$California)-min(datNM_TX1$California))/TX1_bwidth)
 
   #mutual information calc
-NM_TX1_2d <- discretize2d(datNM_TX1$NewMexico, datNM_TX1$Texas, 
+NM_TX1_2d <- discretize2d(datNM_TX1$UnitedStates, datNM_TX1$California, 
                          numBins1 = NM1_bins, numBins2 = TX1_bins)
     #joint entropy
 Joint_1 <- entropy(NM_TX1_2d)
@@ -66,13 +71,13 @@ MI_NM_TX1 <- round((Marg_1r + Marg_1c - Joint_1), digits = 3)
 MI_NM_TX1
 
 #transfer entropy 
-TE_NM_TX1 <- transfer_entropy(datNM_TX1$NewMexico, datNM_TX1$Texas)
+TE_NM_TX1 <- transfer_entropy(datNM_TX1$UnitedStates, datNM_TX1$California)
 TE_NM_TX1
 
 #MI and TE series 2 - quarantine eased ####
 datNM_TX2 <- datNM_TX %>% 
-  filter(Date1 >="2020-09-04")%>% 
-  rename(NewMexico = "New Mexico")
+  filter(Date1 >=day1, Date1 <day2)%>% 
+  rename(UnitedStates = "UnitedStates")
 
 #Descritize data to bins NM_TX 1
 quants2 <- datNM_TX2 %>% 
@@ -80,13 +85,13 @@ quants2 <- datNM_TX2 %>%
   sapply(quantile, probs = c(0.25, 0.75))
 
 NM2_bwidth <- (2*(quants2[2,2] - quants2[1,2]))/nrow(datNM_TX2)^(1/3)
-NM2_bins <- ceiling((max(datNM_TX2$NewMexico)-min(datNM_TX2$NewMexico))/NM2_bwidth)
+NM2_bins <- ceiling((max(datNM_TX2$UnitedStates)-min(datNM_TX2$UnitedStates))/NM2_bwidth)
 
 TX2_bwidth <- (2*(quants2[2,1] - quants2[1,1]))/nrow(datNM_TX2)^(1/3)
-TX2_bins <- ceiling((max(datNM_TX2$Texas)-min(datNM_TX2$Texas))/TX2_bwidth)
+TX2_bins <- ceiling((max(datNM_TX2$California)-min(datNM_TX2$California))/TX2_bwidth)
 
 #mutual information calc
-NM_TX2_2d <- discretize2d(datNM_TX2$NewMexico, datNM_TX2$Texas, 
+NM_TX2_2d <- discretize2d(datNM_TX2$UnitedStates, datNM_TX2$California, 
                           numBins1 = NM2_bins, numBins2 = TX2_bins)
   #joint entropy
 Joint_2 <- entropy(NM_TX2_2d)
@@ -100,44 +105,46 @@ MI_NM_TX2 <- round((Marg_2r + Marg_2c - Joint_2), digits = 3)
 MI_NM_TX2
 
   #transfer entropy 
-TE_NM_TX2 <- transfer_entropy(datNM_TX2$NewMexico, datNM_TX2$Texas)
+TE_NM_TX2 <- transfer_entropy(datNM_TX2$UnitedStates, datNM_TX2$California)
 TE_NM_TX2
 
 #MI and TE plots ####
   #time series
 
-date_range <- which(datNM_TX$Date1 %in% as.Date(c("2021-02-01", "2021-02-02")))
+date_range <- which(datNM_TX$Date1 %in% as.Date(c(day0,day1, day2)))
+
 
 datNM_TX %>% 
-  pivot_longer(cols = Texas:"New Mexico", names_to = "State", values_to = "LogCases") %>% 
+  pivot_longer(cols = California:"UnitedStates", names_to = "State", values_to = "LogCases") %>% 
+  filter(Date1 <= day2) %>% 
   ggplot(aes(x = Date1, y = LogCases, col = State))+
   geom_line(size = 1)+
-  geom_vline(xintercept = as.numeric(datNM_TX$Date1[date_range]),color = "black", 
-             size = 1)+
-  scale_color_manual(values = c("New Mexico" = "red", Texas ="black"))+
+  geom_vline(xintercept = as.Date(day0),color = "black", size = 1)+
+  geom_vline(xintercept = as.Date(day1),color = "black", size = 1)+
+  geom_vline(xintercept = as.Date(day2),color = "black", size = 1)+
+  scale_color_manual(values = c("UnitedStates" = "red", California ="black"))+
+  annotate(geom = "text", x = as.Date("2020-04-15"), y = 300,
+           label = "Before vaccine massive administration", hjust = 0, vjust = 1, size = 4)+
   
-  annotate(geom = "text", x = as.Date("2020-04-01"), y = 300,
-           label = "New Mexico\nout-of-state quarantine", hjust = 0, vjust = 1, size = 4)+
+  annotate(geom = "text", x = as.Date("2020-04-15"), y = 200, size = 4,
+           label = "TE: VM -> WY =0\nTE: WY -> VM = 0", hjust = 0, vjust = 1, size =4)+
   
-  annotate(geom = "text", x = as.Date("2020-04-01"), y = 200, size = 4,
-           label = "TE: NM -> TX = 0\nTE: TX -> NM = 0", hjust = 0, vjust = 1, size =4)+
+  annotate(geom = "text", x = as.Date("2021-06-01"), y = 300, 
+           label = "After vaccine massive administration", hjust = 0, vjust = 1, size = 4)+
   
-  annotate(geom = "text", x = as.Date("2021-04-01"), y = 300, 
-           label = "New Mexico\nout-of-state quarantine eased", hjust = 0, vjust = 1, size = 4)+
-  
-  annotate(geom = "text", x = as.Date("2021-04-01"), y = 200, 
-           label = "TE: NM -> TX = 0.0162\nTE: TX -> NM = 0.0228", hjust = 0, vjust = 1, size = 4)+
+  annotate(geom = "text", x = as.Date("2021-06-01"), y = 200, 
+           label = "TE: VM -> WY = 0.0323\nTE: WY -> VM = 0.037", hjust = 0, vjust = 1, size = 4)+
   
   labs(x = "", y = "Cases (7-day average per 100,000 people)")+
   theme_classic()+
   theme(legend.position = "bottom")
-
+  
   #Venn quarantine - Shannon
 grid.newpage()
 pl_NM_TX1_SE <- draw.pairwise.venn(round(Marg_1r, digits = 3), round(Marg_1c, digits = 3),
                                                 cross.area = 0, col = c("red", "black"),
                                                 fill = c("red", "black"))
-p2_NM_TX1_SE <- ggpubr::annotate_figure(pl_NM_TX1_SE, fig.lab = "New Mexico out-of-state quarantine\n   Shannon Entropy", 
+p2_NM_TX1_SE <- ggpubr::annotate_figure(pl_NM_TX1_SE, fig.lab = "Before vaccine massive administration\n   Shannon Entropy", 
                                      fig.lab.pos = c("top.left"), fig.lab.size = 12, 
                                      fig.lab.face = "bold")
 
@@ -145,7 +152,7 @@ grid.newpage()
 pl_NM_TX2_SE <- draw.pairwise.venn(round(Marg_2r, digits = 3), round(Marg_2c, digits = 3),
                                    cross.area = 0, col = c("red", "black"),
                                    fill = c("red", "black"))
-p2_NM_TX2_SE <- ggpubr::annotate_figure(pl_NM_TX2_SE, fig.lab = "New Mexico out-of-state quarantine eased\n    Shannon Entropy", 
+p2_NM_TX2_SE <- ggpubr::annotate_figure(pl_NM_TX2_SE, fig.lab = "After vaccine massive administration\n    Shannon Entropy", 
                                         fig.lab.pos = c("top.left"), fig.lab.size = 12, 
                                         fig.lab.face = "bold")
 
@@ -167,7 +174,7 @@ p2_NM_TX2 <- ggpubr::annotate_figure(pl_NM_TX2, fig.lab = "Mutual Information",
                                       fig.lab.pos = c("top.left"), fig.lab.size = 12, 
                                       fig.lab.face = "bold")
 
-States <- c("New Mexico", 'Texas' )
+States <- c("UnitedStates", 'California' )
 b <- c(1,2); c <- c(5,3)
 ab_dat <- as.data.frame(cbind(States,b,c))
 p1 <- ggplot(ab_dat, aes(x=b, y = c, color = States))+
@@ -184,26 +191,26 @@ gridExtra::grid.arrange(p2_NM_TX1_SE, p2_NM_TX2_SE, p2_NM_TX1, p2_NM_TX2, mylege
   #data wrangle
       #all data 
 dat_reprod <- datNYT %>% 
-  filter(state == "New Mexico") %>% 
+  filter(state == "UnitedStates") %>% 
   select(date, state, cases_avg_per_100k) %>% 
   mutate(CumCases0 = cumsum(cases_avg_per_100k),
          Time0 = row_number())
 
       #first period out-of-state quarantine for plotting
 dat_reprod1 <- datNYT %>% 
-  filter(state == "New Mexico") %>% 
+  filter(state == "UnitedStates") %>% 
   select(date, state, cases_avg_per_100k) %>% 
   mutate(CumCases1 = cumsum(cases_avg_per_100k),
          Time1 = row_number())%>% 
-  filter(date >="2020-03-11", date < "2020-09-04") 
+  filter(date >="2020-03-11", date < day1) 
 
       #second period out-of-state quarantine easing for plotting
 dat_reprod2 <- datNYT %>% 
-  filter(state == "New Mexico") %>% 
+  filter(state == "UnitedStates") %>% 
   select(date, state, cases_avg_per_100k) %>% 
   mutate(CumCases2 = cumsum(cases_avg_per_100k),
          Time2 = row_number())%>% 
-  filter(date >="2020-09-04") 
+  filter(date >=day1,date <day2) 
 
   #plot
 ggplot(dat_reprod, aes(x=Time0, y = CumCases0))+
