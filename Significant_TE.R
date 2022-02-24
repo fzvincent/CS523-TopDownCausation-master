@@ -21,11 +21,11 @@ BU_TE10 <- TD_TE10 <- rep(0, epsCount)
 pvalue05 <- 0.05
 pvalue10 <- 0.1
 for ( i in 1:epsCount) {
-  for (j in 1:1){
+  for (j in 1:metaCount){
     filename <- paste('TEdata/TEdata_MX_',i-1,'_',j,'.csv',sep = '')
     lm_data <- read.csv(filename)
     
-    for (k in 2:4){
+    for (k in 1:4){
       for (depth in range(1:4))
         
         TE_temp <- transfer_entropy(lm_data[1], lm_data[k], 
